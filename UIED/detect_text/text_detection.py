@@ -123,7 +123,9 @@ def text_detection(input_file='../data/input/30800.jpg', output_file='../data/ou
     img = cv2.imread(input_file)
 
     ocr_result = ocr.ocr_detection_google(input_file)
+    print(ocr_result)
     texts = text_cvt_orc_format(ocr_result)
+    print(texts)
     texts = merge_intersected_texts(texts)
     texts = text_filter_noise(texts)
     texts = text_sentences_recognition(texts)

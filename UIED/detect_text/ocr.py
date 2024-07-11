@@ -4,6 +4,8 @@ import requests
 import json
 from base64 import b64encode
 import time
+import pytesseract
+from PIL import Image
 
 
 def Google_OCR_makeImageData(imgpath):
@@ -23,7 +25,42 @@ def Google_OCR_makeImageData(imgpath):
 
 
 def ocr_detection_google(imgpath):
-    start = time.clock()
+    # Start the timer
+    start = time.time()
+    
+    # Load the image using PIL
+    try:
+        img = Image.open(imgpath)
+    except FileNotFoundError:
+        print(f"File not found: {imgpath}")
+        return None
+    
+    # Perform OCR using Tesseract
+    text = pytesseract.image_to_string(img)
+    
+    # Print the time taken
+    print(f"*** Text Detection Time Taken: {time.time() - start:.3f}s ***")
+    
+    # Split the text into lines (or words) for individual text annotations
+    lines = text.split('\n')
+    
+    # Create a JSON response similar to Google OCR
+    text_annotations = [{'description': line} for line in lines if line.strip()]
+    response = {
+        'responses': [{
+            'textAnnotations': text_annotations
+        }]
+    }
+    
+    # Return the relevant part of the response
+    return response['responses'][0]['textAnnotations']
+
+""" # Example usage
+imgpath = 'testing.png'
+json_response = ocr_detection_google(imgpath)
+print(json.dumps(json_response, indent=2)) """
+
+"""     start = time.clock()
     url = 'https://vision.googleapis.com/v1/images:annotate'
     # api_key = 'AIzaSyDUc4iOUASJQYkVwSomIArTKhE2C6bHK8U'             # *** Replace with your own Key ***
     api_key = 'AIzaSyAeSaaOE-upsRshfOEkkMIUcAiBzDSVOAo'
@@ -39,3 +76,4 @@ def ocr_detection_google(imgpath):
         return None
     else:
         return response.json()['responses'][0]['textAnnotations'][1:]
+ """
